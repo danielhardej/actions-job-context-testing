@@ -1,0 +1,96 @@
+name: Job Context - Conditional Execution
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+jobs:
+  conditional-steps:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Always runs
+        run: echo "This step always runs"
+
+      - name: Run on success
+        if: success()
+        run: |
+          echo "Previous steps succeeded"
+          echo "Job Status: ${{ job.status }}"
+
+      - name: Intentional failure
+        id: failing-step
+        run: exit 1
+        continue-on-error: true
+
+      - name: Run on failure
+        if: failure()
+        run: echo "A previous step failed"
+
+      - name: Always run regardless of status
+        if: always()
+        run: |
+          echo "This runs regardless of previous step outcomes"
+          echo "Job Status: ${{ job.status }}"
+
+      - name: Run if cancelled
+        if: cancelled()
+        run: echo "Job was cancelled"
+
+  conditional-job-on-event:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - name: Push event specific
+        run: |
+          echo "This job only runs on push events"
+          echo "Event: ${{ github.event_name }}"
+          echo "Job Status: ${{ job.status }}"
+
+  conditional-job-on-branch:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Main branch specific
+        run: |
+          echo "This job only runs on main branch"
+          echo "Branch: ${{ github.ref }}"
+          echo "Job Status: ${{ job.status }}"
+
+  conditional-job-on-input:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
+    steps:
+      - name: Production deployment
+        run: |
+          echo "This job only runs for production environment input"
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Job Status: ${{ job.status }}"
+
+  check-actor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Display actor information
+        run: |
+          echo "Triggered by: ${{ github.actor }}"
+          echo "Job Status: ${{ job.status }}"
+
+      - name: Run if specific actor
+        if: github.actor == 'dependabot[bot]'
+        run: echo "This was triggered by Dependabot"
+
+      - name: Run for human actors
+        if: github.actor != 'dependabot[bot]'
+        run: echo "This was triggered by a human"

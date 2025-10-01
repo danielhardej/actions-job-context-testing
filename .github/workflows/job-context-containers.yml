@@ -1,0 +1,75 @@
+name: Job Context - Container Services
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  job-with-container:
+    runs-on: ubuntu-latest
+    container:
+      image: node:18
+      env:
+        NODE_ENV: development
+      options: --cpus 1
+    steps:
+      - name: Display container context
+        run: |
+          echo "Job running in container"
+          echo "Job Status: ${{ job.status }}"
+          echo "Container ID: ${{ job.container.id }}"
+          echo "Container Network: ${{ job.container.network }}"
+          node --version
+
+      - name: Display full job context with container
+        run: echo '${{ toJSON(job) }}'
+
+  job-with-services:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Display services context
+        run: |
+          echo "Job Status: ${{ job.status }}"
+          echo "Services available"
+          echo "Job Services Context:"
+          echo '${{ toJSON(job.services) }}'
+
+      - name: Test Redis connection
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y redis-tools
+          redis-cli -h localhost ping
+
+      - name: Test PostgreSQL connection
+        run: |
+          sudo apt-get install -y postgresql-client
+          PGPASSWORD=postgres psql -h localhost -U postgres -c "SELECT version();"
+
+      - name: Display full job context with services
+        run: echo '${{ toJSON(job) }}'

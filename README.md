@@ -12,6 +12,7 @@ The GitHub Actions `job` context contains information about the currently runnin
 
 Demonstrates fundamental job context properties:
 - Accessing `job.status`
+- Accessing `job.check_run_id`
 - Displaying the complete job context as JSON
 - Showing related context information (runner, github)
 
@@ -98,6 +99,7 @@ Shows various conditional execution patterns:
 | Property | Description |
 |----------|-------------|
 | `job.status` | The current status of the job |
+| `job.check_run_id` | The ID of the check run associated with this job |
 | `job.container.id` | The ID of the job's container |
 | `job.container.network` | The network ID of the job's container |
 | `job.services` | Service containers created for the job |

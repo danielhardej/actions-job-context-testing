@@ -15,6 +15,7 @@ jobs:
         run: |
           echo "Job ID: ${{ github.job }}"
           echo "Job Status: ${{ job.status }}"
+          echo "Job Check Run ID: ${{ job.check_run_id }}"
           echo "Runner Name: ${{ runner.name }}"
           echo "Runner OS: ${{ runner.os }}"
           echo "Runner Arch: ${{ runner.arch }}"

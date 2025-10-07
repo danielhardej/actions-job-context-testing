@@ -1,0 +1,36 @@
+name: Job Context - Basics
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  basic-job-context:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Display job context
+        run: |
+          echo "Job ID: ${{ github.job }}"
+          echo "Job Status: ${{ job.status }}"
+          echo "Job Check Run ID: ${{ job.check_run_id }}"
+          echo "Runner Name: ${{ runner.name }}"
+          echo "Runner OS: ${{ runner.os }}"
+          echo "Runner Arch: ${{ runner.arch }}"
+
+      - name: Display job context as JSON
+        run: |
+          echo 'Job Context:'
+          echo '${{ toJSON(job) }}'
+
+      - name: Display github context
+        run: |
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Action: ${{ github.action }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Event Name: ${{ github.event_name }}"
+          echo "SHA: ${{ github.sha }}"
+          echo "Ref: ${{ github.ref }}"
